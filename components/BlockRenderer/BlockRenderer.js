@@ -1,3 +1,7 @@
+import Image from 'next/image'
+
+import { theme } from 'theme'
+
 import { Cover } from 'components/Cover'
 import { Heading } from 'components/Heading'
 import { Paragraph } from 'components/Paragraph'
@@ -5,18 +9,60 @@ import { CallToActionButton } from 'components/CallToActionButton'
 import { Columns } from 'components/Columns'
 import { Column } from 'components/Column'
 import { PropertySearch } from 'components/PropertySearch'
-import Image from 'next/image'
-
-import { theme } from 'theme'
+import { FormspreeForm } from 'components/FormspreeForm'
+import { PropertyFeatures } from 'components/PropertyFeatures'
+import { Gallery } from 'components/Gallery'
+import { TickItem } from 'components/TickItem'
 
 export function BlockRenderer({ blocks }) {
   return blocks.map(block => {
     switch(block.name) {
+      case "acf/tickitem": {
+        return (
+          <TickItem key={block.id}>
+            <BlockRenderer 
+              blocks={block.innerBlocks}
+            />
+          </TickItem>
+        )
+      }
+      case "core/gallery": {
+        return (
+          <Gallery 
+            key={block.id} 
+            columns={block.attributes.columns || 3}
+            cropImages={block.attributes.imageCrop}
+            items={block.innerBlocks}
+          />
+        )
+      }
+      case "acf/propertyfeatures": {
+        return (
+          <PropertyFeatures 
+            key={block.id} 
+            price={block.attributes.price}
+            bedrooms={block.attributes.bedrooms}
+            bathrooms={block.attributes.bathrooms}
+            hasParking={block.attributes.has_parking}
+            petFriendly={block.attributes.pet_friendly}
+          />
+        )
+      }
+      case "acf/formspreeform": {
+        return (
+          <FormspreeForm 
+            key={block.id}
+            formId={block.attributes.data.form_id}
+          />
+        )
+      }
       case "core/columns": {
         return (
           <Columns 
             key={block.id} 
             isStackedOnMobile={block.attributes.isStackedOnMobile}
+            backgroundColor={theme[block.attributes?.backgroundColor] || block.attributes?.style?.color?.background}
+            textColor={theme[block.attributes?.textColor] || block.attributes?.style?.color?.text}
           >
             <BlockRenderer blocks={block.innerBlocks} />
           </Columns>
@@ -27,7 +73,10 @@ export function BlockRenderer({ blocks }) {
           <Column 
             key={block.id} 
             width={block.attributes?.width}
-          ><BlockRenderer blocks={block.innerBlocks} />
+            backgroundColor={theme[block.attributes?.backgroundColor] || block.attributes?.style?.color?.background}
+            textColor={theme[block.attributes?.textColor] || block.attributes?.style?.color?.text}
+          >
+            <BlockRenderer blocks={block.innerBlocks} />
           </Column>
         )
       }
